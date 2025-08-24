@@ -11,6 +11,7 @@ import tech.clavem303.DTOs.BookingUpdateStatusDTO;
 import tech.clavem303.DTOs.clients.VehicleResponseDTO;
 import tech.clavem303.DTOs.clients.VehicleStatus;
 import tech.clavem303.entities.Booking;
+import tech.clavem303.entities.BookingStatus;
 import tech.clavem303.exceptions.BusinessRuleException;
 import tech.clavem303.exceptions.ResourceNotFoundException;
 import tech.clavem303.repositories.BookingRepository;
@@ -37,13 +38,20 @@ public class BookingService {
     public BookingResponseDTO createBooking(BookingCreateDTO dto, String customerId) {
         validateBookingDates(dto.startDate(), dto.endDate());
 
+        if (bookingRepository.isVehicleBooked(dto.vehicleId()))
+            throw new BusinessRuleException("The vehicle is already booked for this period.");
+
         Optional<VehicleResponseDTO> vehicleOptional = vehicleApiClient.getVehicle(dto.vehicleId());
 
-        if (vehicleOptional.isEmpty() || !VehicleStatus.AVAILABLE.equals(vehicleOptional.get().status())) {
+        if (vehicleOptional.isEmpty() || !VehicleStatus.AVAILABLE.equals(vehicleOptional.get().status()))
             throw new BusinessRuleException("It's not available for booking.");
-        }
 
-        Booking booking = new Booking(dto.vehicleId(), customerId, dto.startDate(), dto.endDate());
+        if (bookingRepository.isVehicleBooked(dto.vehicleId()))
+            throw new BusinessRuleException("A concurrent booking was detected. Please try again.");
+
+        String carTitle = vehicleOptional.map(VehicleResponseDTO::carTitle).orElse("N/A");
+
+        Booking booking = new Booking(dto.vehicleId(), customerId, dto.startDate(), dto.endDate(), carTitle );
         bookingRepository.persist(booking);
         return toResponseDTO(booking);
     }
@@ -71,15 +79,29 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponseDTO updateStatus(Long id, BookingUpdateStatusDTO dto) {
+    public BookingResponseDTO cancelBooking(Long id, BookingUpdateStatusDTO dto) {
         Booking booking = findBookingOrThrow(id);
 
-        switch (dto.status()) {
-            case CANCELED -> booking.cancel();
-            case FINISHED -> booking.finish();
-            default -> throw new BusinessRuleException("Use 'CANCELED' or 'FINISHED'.");
-        }
+        if(dto.status() != BookingStatus.CANCELED)
+            throw new BusinessRuleException(
+                    "Only 'CANCELED' status updates are allowed here. " +
+                            "Use the specific check-in/check-out endpoints for other transitions."
+            );
+        booking.cancel();
+        return toResponseDTO(booking);
+    }
 
+    @Transactional
+    public BookingResponseDTO checkInBooking(Long id) {
+        Booking booking = findBookingOrThrow(id);
+        booking.activate();
+        return toResponseDTO(booking);
+    }
+
+    @Transactional
+    public BookingResponseDTO checkOutBooking(Long id) {
+        Booking booking = findBookingOrThrow(id);
+        booking.finish();
         return toResponseDTO(booking);
     }
 
@@ -108,7 +130,12 @@ public class BookingService {
                 booking.getCustomerId(),
                 booking.getStartDate(),
                 booking.getEndDate(),
-                booking.getStatus()
+                booking.getStatus(),
+                booking.getActivedAt(),
+                booking.getFinishedAt(),
+                booking.getCanceledAt(),
+                booking.getCarTitle()
         );
     }
+
 }

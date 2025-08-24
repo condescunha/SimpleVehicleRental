@@ -23,7 +23,7 @@ public class BookingResource {
     SecurityIdentity securityIdentity;
 
     @POST
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed({"admin", "employee", "user"})
     public Response createBooking(@Valid BookingCreateDTO dto) {
         return Response.status(Response.Status.CREATED)
                 .entity(bookingService.createBooking(dto, getCostumerId()))
@@ -31,7 +31,7 @@ public class BookingResource {
     }
 
     @GET
-    @RolesAllowed({"user", "admin"})
+    @RolesAllowed({"admin", "employee", "user"})
     public Response getAllBookings() {
         if(!securityIdentity.hasRole("admin"))
             return Response.ok(bookingService.findBookingsByUser(getCostumerId())).build();
@@ -41,16 +41,30 @@ public class BookingResource {
 
     @GET
     @Path("/{id}")
-    @RolesAllowed({"admin", "user"})
+    @RolesAllowed({"admin", "employee", "user"})
     public Response getBookingById(@PathParam("id") Long id) {
         return Response.ok(bookingService.findBookingById(id, getCostumerId())).build();
     }
 
     @PATCH
-    @Path("/{id}/status")
-    @RolesAllowed("admin")
-    public Response updateStatus(@PathParam("id") Long id, BookingUpdateStatusDTO dto) {
-        return Response.ok(bookingService.updateStatus(id, dto)).build();
+    @Path("/cancel/{id}")
+    @RolesAllowed({"admin", "employee"})
+    public Response cancelBooking(@PathParam("id") Long id, BookingUpdateStatusDTO dto) {
+        return Response.ok(bookingService.cancelBooking(id, dto)).build();
+    }
+
+    @PATCH
+    @Path("/checkin/{id}")
+    @RolesAllowed({"admin", "employee"})
+    public Response checkIn(@PathParam("id") Long id) {
+        return Response.ok(bookingService.checkInBooking(id)).build();
+    }
+
+    @PATCH
+    @Path("/checkout/{id}")
+    @RolesAllowed({"admin", "employee"})
+    public Response checkOut(@PathParam("id") Long id) {
+        return Response.ok(bookingService.checkOutBooking(id)).build();
     }
 
     private String getCostumerId(){

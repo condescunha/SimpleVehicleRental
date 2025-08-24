@@ -38,13 +38,8 @@ public class BookingResourceTest {
         VehicleApiClient mock = Mockito.mock(VehicleApiClient.class);
 
         VehicleResponseDTO mockVehicle = new VehicleResponseDTO(
-                1L,
-                "Ford",
-                2024,
-                "V6",
-                "Fusion",
-                VehicleStatus.AVAILABLE,
-                "123-ABC"
+                VehicleStatus.AVAILABLE, // Apenas o status é necessário
+                "123-ABC"                // E apenas o carTitle
         );
         when(mock.getVehicle(anyLong())).thenReturn(Optional.of(mockVehicle));
 
@@ -66,7 +61,11 @@ public class BookingResourceTest {
                 "fake_customer",
                 LocalDate.now(),
                 LocalDate.now().plusDays(5),
-                BookingStatus.CREATED
+                BookingStatus.CREATED,
+                null,
+                null,
+                null,
+                "Ford Fusion"
         );
 
         Mockito
