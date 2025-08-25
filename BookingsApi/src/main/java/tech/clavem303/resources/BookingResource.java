@@ -8,7 +8,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import tech.clavem303.DTOs.BookingCreateDTO;
-import tech.clavem303.DTOs.BookingUpdateStatusDTO;
 import tech.clavem303.services.BookingService;
 
 @Path("/bookings")
@@ -49,8 +48,8 @@ public class BookingResource {
     @PATCH
     @Path("/cancel/{id}")
     @RolesAllowed({"admin", "employee"})
-    public Response cancelBooking(@PathParam("id") Long id, BookingUpdateStatusDTO dto) {
-        return Response.ok(bookingService.cancelBooking(id, dto)).build();
+    public Response cancelBooking(@PathParam("id") Long id) {
+        return Response.ok(bookingService.cancelBooking(id)).build();
     }
 
     @PATCH

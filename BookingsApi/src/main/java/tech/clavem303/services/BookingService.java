@@ -7,11 +7,9 @@ import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import tech.clavem303.DTOs.BookingCreateDTO;
 import tech.clavem303.DTOs.BookingResponseDTO;
-import tech.clavem303.DTOs.BookingUpdateStatusDTO;
 import tech.clavem303.DTOs.clients.VehicleResponseDTO;
 import tech.clavem303.DTOs.clients.VehicleStatus;
 import tech.clavem303.entities.Booking;
-import tech.clavem303.entities.BookingStatus;
 import tech.clavem303.exceptions.BusinessRuleException;
 import tech.clavem303.exceptions.ResourceNotFoundException;
 import tech.clavem303.repositories.BookingRepository;
@@ -79,14 +77,8 @@ public class BookingService {
     }
 
     @Transactional
-    public BookingResponseDTO cancelBooking(Long id, BookingUpdateStatusDTO dto) {
+    public BookingResponseDTO cancelBooking(Long id) {
         Booking booking = findBookingOrThrow(id);
-
-        if(dto.status() != BookingStatus.CANCELED)
-            throw new BusinessRuleException(
-                    "Only 'CANCELED' status updates are allowed here. " +
-                            "Use the specific check-in/check-out endpoints for other transitions."
-            );
         booking.cancel();
         return toResponseDTO(booking);
     }
