@@ -2,6 +2,7 @@ package tech.clavem303.resources;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Singleton;
@@ -30,16 +31,19 @@ public class BookingResourceTest {
     @InjectMock
     BookingService bookingService;
 
-    VehicleApiClient vehicleApiClient;
-
     @Produces
     @Singleton
     VehicleApiClient getMockedVehicleApiClient() {
         VehicleApiClient mock = Mockito.mock(VehicleApiClient.class);
 
         VehicleResponseDTO mockVehicle = new VehicleResponseDTO(
-                VehicleStatus.AVAILABLE, // Apenas o status é necessário
-                "123-ABC"                // E apenas o carTitle
+                1L,
+                "Ford",
+                2024,
+                "V6",
+                "Fusion",
+                VehicleStatus.AVAILABLE,
+                "Ford Fusion V6"
         );
         when(mock.getVehicle(anyLong())).thenReturn(Optional.of(mockVehicle));
 
@@ -47,6 +51,7 @@ public class BookingResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "fake_customer", roles = "user")
     public void testCreateBookingSuccessfully() {
         // Arrange
         BookingCreateDTO createDTO = new BookingCreateDTO(
@@ -65,7 +70,7 @@ public class BookingResourceTest {
                 null,
                 null,
                 null,
-                "Ford Fusion"
+                "Ford Fusion V6"
         );
 
         Mockito
