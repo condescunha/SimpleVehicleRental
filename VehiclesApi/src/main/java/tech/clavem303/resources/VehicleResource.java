@@ -1,5 +1,6 @@
 package tech.clavem303.resources;
 
+import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @Path("/vehicles")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
+@Authenticated
 public class VehicleResource {
 
     @Inject
