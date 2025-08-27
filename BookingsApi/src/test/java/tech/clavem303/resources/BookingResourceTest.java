@@ -18,6 +18,7 @@ import tech.clavem303.services.BookingService;
 import tech.clavem303.services.clients.VehicleApiClient;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static io.restassured.RestAssured.given;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
+@TestSecurity(user = "fake_customer", roles = "admin")
 public class BookingResourceTest {
 
     @InjectMock
@@ -51,7 +53,6 @@ public class BookingResourceTest {
     }
 
     @Test
-    @TestSecurity(user = "fake_customer", roles = "user")
     public void testCreateBookingSuccessfully() {
         // Arrange
         BookingCreateDTO createDTO = new BookingCreateDTO(
@@ -88,5 +89,202 @@ public class BookingResourceTest {
                 .body("id", is(1))
                 .body("vehicleId", is(1))
                 .body("status", is("CREATED"));
+    }
+
+    @Test
+    @TestSecurity(user = "fake_customer", roles = "user")
+    public void testGetAllBookingsAsUser() {
+        // Arrange
+        BookingResponseDTO userBooking = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.CREATED,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        when(bookingService.findBookingsByUser("fake_customer")).thenReturn(List.of(userBooking));
+
+        // Act & Assert
+        given()
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/bookings")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("$.size()", is(1))
+                .body("[0].id", is(1))
+                .body("[0].customerId", is("fake_customer"));
+    }
+
+    @Test
+    public void testGetAllBookingsAsAdmin() {
+        // Arrange
+        BookingResponseDTO booking1 = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.CREATED,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        BookingResponseDTO booking2 = new BookingResponseDTO(
+                2L,
+                2L,
+                "another_customer",
+                LocalDate.now().plusDays(1),
+                LocalDate.now().plusDays(6),
+                BookingStatus.ACTIVE,
+                null,
+                null,
+                null,
+                "Tesla Model 3"
+        );
+
+        when(bookingService.findAllBookings()).thenReturn(List.of(booking1, booking2));
+
+        // Act & Assert
+        given()
+                .when()
+                .get("/bookings")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("$.size()", is(2))
+                .body("[0].id", is(1))
+                .body("[1].id", is(2));
+    }
+
+    @Test
+    public void testGetBookingByIdSuccessfully() {
+        // Arrange
+        BookingResponseDTO responseDTO = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.CREATED,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        when(bookingService.findBookingById(1L, "fake_customer")).thenReturn(responseDTO);
+
+        // Act & Assert
+        given()
+                .when()
+                .get("/bookings/1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("id", is(1))
+                .body("status", is("CREATED"));
+    }
+
+    @Test
+    public void testCancelBookingSuccessfully() {
+        // Arrange
+        BookingResponseDTO canceledDTO = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.CANCELED,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        when(bookingService.cancelBooking(1L)).thenReturn(canceledDTO);
+
+        // Act & Assert
+        given()
+                .when()
+                .patch("/bookings/cancel/1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("id", is(1))
+                .body("status", is("CANCELED"));
+    }
+
+    @Test
+    public void testCheckInBookingSuccessfully() {
+        // Arrange
+        BookingResponseDTO activeDTO = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.ACTIVE,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        when(bookingService.checkInBooking(1L)).thenReturn(activeDTO);
+
+        // Act & Assert
+        given()
+                .when()
+                .patch("/bookings/checkin/1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("id", is(1))
+                .body("status", is("ACTIVE"));
+    }
+
+    @Test
+    public void testCheckOutBookingSuccessfully() {
+        // Arrange
+        BookingResponseDTO finishedDTO = new BookingResponseDTO(
+                1L,
+                1L,
+                "fake_customer",
+                LocalDate.now(),
+                LocalDate.now().plusDays(5),
+                BookingStatus.FINISHED,
+                null,
+                null,
+                null,
+                "Ford Fusion V6"
+        );
+
+        when(bookingService.checkOutBooking(1L)).thenReturn(finishedDTO);
+
+        // Act & Assert
+        given()
+                .when()
+                .patch("/bookings/checkout/1")
+                .then()
+                .statusCode(Response.Status.OK.getStatusCode())
+                .body("id", is(1))
+                .body("status", is("FINISHED"));
+    }
+
+    // Additional failure test example: Unauthorized access to cancel as user
+    @Test
+    @TestSecurity(user = "fake_customer", roles = "user")
+    public void testCancelBookingUnauthorized() {
+        // Act & Assert
+        given()
+                .when()
+                .patch("/bookings/cancel/1")
+                .then()
+                .statusCode(Response.Status.FORBIDDEN.getStatusCode());
     }
 }

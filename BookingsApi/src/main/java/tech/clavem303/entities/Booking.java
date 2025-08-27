@@ -42,7 +42,7 @@ public class Booking {
     }
 
     public void cancel() {
-        if (this.status != BookingStatus.CREATED)
+        if (this.status != BookingStatus.CREATED && this.status != BookingStatus.ACTIVE)
             throw new IllegalStateException("Cancel only with CREATED or ACTIVE status.");
         this.status = BookingStatus.CANCELED;
         this.canceledAt = OffsetDateTime.now();
