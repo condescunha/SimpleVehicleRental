@@ -1,6 +1,7 @@
 package tech.clavem303.resources;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.http.ContentType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 
 @QuarkusTest
+@TestSecurity(user = "fake_customer", roles = "admin")
 public class VehicleResourceTest {
 
     @Test
