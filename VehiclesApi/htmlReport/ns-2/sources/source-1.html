@@ -1,0 +1,190 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > VehicleResource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">tech.clavem303.resources</a>
+</div>
+
+<h1>Coverage Summary for Class: VehicleResource (tech.clavem303.resources)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">VehicleResource</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$create_ddaa1e119b2ad1e650632766a4eca7f6a01626b2</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$delete_4c503f18b21901dc70a60a68f383ed5ceb90851d</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$getAllVehicles_c41b47c41788b73b0d35bd5598c25c7a7406a05a</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$getById_e66197f42a3036fdd610d048b191865c1c2d0c7e</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$update_7040a993e2ddbe24d868f6f149241f763af839ab</td>
+  </tr>
+  <tr>
+    <td class="name">VehicleResource$quarkusrestinvoker$updateStatus_4cf8e1a097d80dc9ac77a867015d244584bd0554</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package tech.clavem303.resources;
+&nbsp;
+&nbsp;import io.quarkus.security.Authenticated;
+&nbsp;import jakarta.inject.Inject;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import jakarta.ws.rs.*;
+&nbsp;import jakarta.ws.rs.core.MediaType;
+&nbsp;import jakarta.ws.rs.core.Response;
+&nbsp;import tech.clavem303.DTOs.VehicleCreateDTO;
+&nbsp;import tech.clavem303.DTOs.VehicleResponseDTO;
+&nbsp;import tech.clavem303.DTOs.VehicleStatusUpdateDTO;
+&nbsp;import tech.clavem303.DTOs.VehicleUpdateDTO;
+&nbsp;import tech.clavem303.services.VehicleService;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;@Path(&quot;/vehicles&quot;)
+&nbsp;@Consumes(MediaType.APPLICATION_JSON)
+&nbsp;@Produces(MediaType.APPLICATION_JSON)
+&nbsp;@Authenticated
+<b class="fc">&nbsp;public class VehicleResource {</b>
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    VehicleService vehicleService;
+&nbsp;
+&nbsp;    @POST
+&nbsp;    public Response create(@Valid VehicleCreateDTO dto) {
+<b class="fc">&nbsp;        VehicleResponseDTO createdVehicle = vehicleService.createVehicle(dto);</b>
+<b class="fc">&nbsp;        return Response.status(Response.Status.CREATED).entity(createdVehicle).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GET
+&nbsp;    public List&lt;VehicleResponseDTO&gt; getAllVehicles() {
+<b class="fc">&nbsp;        return vehicleService.findAllVehicles();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GET
+&nbsp;    @Path(&quot;/{id}&quot;)
+&nbsp;    public VehicleResponseDTO getById(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        return vehicleService.findVehicleById(id);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PATCH
+&nbsp;    @Path(&quot;/{id}&quot;)
+&nbsp;    public VehicleResponseDTO update(@PathParam(&quot;id&quot;) Long id, VehicleUpdateDTO dto) {
+<b class="fc">&nbsp;        return vehicleService.updateVehicle(id, dto);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PUT
+&nbsp;    @Path(&quot;/{id}/status&quot;)
+&nbsp;    public VehicleResponseDTO updateStatus(@PathParam(&quot;id&quot;) Long id, @Valid VehicleStatusUpdateDTO dto) {
+<b class="fc">&nbsp;        return vehicleService.updateStatus(id, dto);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DELETE
+&nbsp;    @Path(&quot;/{id}&quot;)
+&nbsp;    public Response delete(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        vehicleService.deleteVehicleById(id);</b>
+<b class="fc">&nbsp;        return Response.status(Response.Status.NO_CONTENT).build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-31 16:11</div>
+</div>
+</body>
+</html>
