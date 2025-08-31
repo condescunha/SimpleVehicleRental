@@ -1,0 +1,222 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > BookingResource</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">tech.clavem303.resources</a>
+</div>
+
+<h1>Coverage Summary for Class: BookingResource (tech.clavem303.resources)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">BookingResource</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$cancelBooking_86f96b1e95e2bb234cd4750651bc5009a7d65990</td>
+  </tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$checkIn_768bef1b97935db7bc345e427d4b2d4274331e2a</td>
+  </tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$checkOut_ea3c7e49dd7971c2b8939217fcea4103d7c2961c</td>
+  </tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$createBooking_1d911f8714a84b339abec5e577c6ea2d442aeff0</td>
+  </tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$getAllBookings_186a92e8ad87b8b7736d3a05b42663b336bbd734</td>
+  </tr>
+  <tr>
+    <td class="name">BookingResource$quarkusrestinvoker$getBookingById_5f20d35b8c7bf89d91a5523aa351c0e0e1e29c21</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package tech.clavem303.resources;
+&nbsp;
+&nbsp;import io.quarkus.security.identity.SecurityIdentity;
+&nbsp;import jakarta.annotation.security.RolesAllowed;
+&nbsp;import jakarta.inject.Inject;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import jakarta.ws.rs.*;
+&nbsp;import jakarta.ws.rs.core.MediaType;
+&nbsp;import jakarta.ws.rs.core.Response;
+&nbsp;import tech.clavem303.DTOs.BookingCreateDTO;
+&nbsp;import tech.clavem303.services.BookingService;
+&nbsp;
+&nbsp;@Path(&quot;/bookings&quot;)
+&nbsp;@Produces(MediaType.APPLICATION_JSON)
+&nbsp;@Consumes(MediaType.APPLICATION_JSON)
+<b class="fc">&nbsp;public class BookingResource {</b>
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    BookingService bookingService;
+&nbsp;
+&nbsp;    @Inject
+&nbsp;    SecurityIdentity securityIdentity;
+&nbsp;
+&nbsp;    @POST
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;, &quot;user&quot;})
+&nbsp;    public Response createBooking(@Valid BookingCreateDTO dto) {
+<b class="fc">&nbsp;        return Response.status(Response.Status.CREATED)</b>
+<b class="fc">&nbsp;                .entity(bookingService.createBooking(dto, getCostumerId()))</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GET
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;, &quot;user&quot;})
+&nbsp;    public Response getAllBookings() {
+<b class="fc">&nbsp;        if(!securityIdentity.hasRole(&quot;admin&quot;))</b>
+<b class="fc">&nbsp;            return Response.ok(bookingService.findBookingsByUser(getCostumerId())).build();</b>
+&nbsp;
+<b class="fc">&nbsp;        return Response.ok(bookingService.findAllBookings()).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GET
+&nbsp;    @Path(&quot;/{id}&quot;)
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;, &quot;user&quot;})
+&nbsp;    public Response getBookingById(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        return Response.ok(bookingService.findBookingById(id, getCostumerId())).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PATCH
+&nbsp;    @Path(&quot;/cancel/{id}&quot;)
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;})
+&nbsp;    public Response cancelBooking(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        return Response.ok(bookingService.cancelBooking(id)).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PATCH
+&nbsp;    @Path(&quot;/checkin/{id}&quot;)
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;})
+&nbsp;    public Response checkIn(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        return Response.ok(bookingService.checkInBooking(id)).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PATCH
+&nbsp;    @Path(&quot;/checkout/{id}&quot;)
+&nbsp;    @RolesAllowed({&quot;admin&quot;, &quot;employee&quot;})
+&nbsp;    public Response checkOut(@PathParam(&quot;id&quot;) Long id) {
+<b class="fc">&nbsp;        return Response.ok(bookingService.checkOutBooking(id)).build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    private String getCostumerId(){
+<b class="fc">&nbsp;        return securityIdentity.getPrincipal().getName();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2025-08-31 16:18</div>
+</div>
+</body>
+</html>
